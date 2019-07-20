@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+		 crossorigin="anonymous">
+		<script src="js/jquery.min.js"></script>
+		<script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+		 crossorigin="anonymous"></script>
+		<script src="js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+		 crossorigin="anonymous"></script>
+
+		<title>每日打卡</title>
+		<style type="text/css">
+			.container {
+				padding-top: 1rem;
+			}
+			h2 {
+
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h2>每日打卡</h2>
+			<form  enctype="multipart/form-data" id="checkClass" name="fileinfo" >
+			
+				<div class="form-group">
+					<label for="account">学号</label>
+					<input type="text" class="form-control" id="account" name="account" value=""/>
+				</div>
+				<div class="form-group">
+					<label for="formItem">参与项目</label>
+					<select class="form-control" id="formItem" name="type">						
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="formIdea">每日感想</label>
+					<textarea class="form-control" id="formIdea" rows="3" name="explain"></textarea>
+				</div>
+				<div class="form-group" id="uploadImgPap">
+					<label for="uploadImg" class="btn btn-primary">上传照片</label>
+					<!-- <button type="button" class="btn btn-primary" onclick="fileup()">上传照片</button> -->
+					<input type="file" class="form-control-file" id="uploadImg" accept="image/*" name="file" style="display:none;" />
+					<span id="imgback">
+						
+					</span>
+				</div>
+				<div class="form-group">
+					<input type="submit" class="btn btn-primary mb-2" id="submit" value="打卡" />
+				</div>
+			</form>
+			
+			<div class="modal fade" id="successUp" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+			  <div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+				  <div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLongTitle">打卡成功</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					  <span aria-hidden="true">&times;</span>
+					</button>
+				  </div>
+				  <div class="modal-body">
+					两秒后刷新页面...
+				  </div>
+				  <div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary">确认</button>
+				  </div>
+				</div>
+			  </div>
+			</div>
+			
+			<div class="modal fade" id="falseUp" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+			  <div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+				  <div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLongTitle">打卡失败</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					  <span aria-hidden="true">&times;</span>
+					</button>
+				  </div>
+				  <div class="modal-body">
+					请重试或检查网络	
+				  </div>
+				  <div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary">确认</button>
+				  </div>
+				</div>
+			  </div>
+			</div>
+		</div>
+		<script src="js/jquerysession.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			$(function(){
+				var account = $.session.get('account');
+				$("#account")[0].value = account;
+				var types = $.session.get('types');
+				for(var i=0;i<types.length;i++)
+				{
+				switch(types[i]){
+					case '1':$("#formItem").append("<option value='1'>起床</option>");break;	
+					case '2':$("#formItem").append("<option value='2'>阅读</option>");break;	
+					case '3':$("#formItem").append("<option value='3'>练字</option>");break;	
+					case '4':$("#formItem").append("<option value='4'>运动</option>");break;	
+				}				
+				}
+		        history.pushState(null, null, document.URL);
+				window.addEventListener('popstate', function () {
+                    history.pushState(null, null, document.URL);
+				});
+			});
+			
+			function fileup(){
+				$("#uploadImg").click();
+			}
+			$("#uploadImg").on("change",function(event){
+				console.log(event.target.files);
+				if(event.target.files.length){
+					document.getElementById("imgback").innerText = "图片上传成功";
+				}
+			})
+			$("form").submit(function(){
+				var form = document.getElementById("checkClass")
+				var formdata = new FormData(form);
+			// 	//识别项目类型,并修改值
+				switch (formdata.get("type")){
+					case "早起":
+						formdata.set("type", 1)
+						break;
+					case "阅读":
+						formdata.set("type", 2)
+						break;	
+					case "练字":
+						formdata.set("type", 3)
+						break;	
+					case "运动":
+						formdata.set("type", 4)
+						break;
+				}
+				//打卡ajax提交表单formdata
+				$.ajax({
+					url: "http://47.100.229.138/yiBan/public/index.php/clock",
+					type: "post",
+					data: formdata,
+					processData: false,
+					contentType: false,
+					success: (res) => {
+						console.log(res);
+						if(res == 1){
+							// console.log("上传成功")
+							$('#successUp').modal('show');
+							setTimeout(function(){
+								location.reload();
+							},2000)
+						}else{
+							$('#falseUp').modal('show');
+						}
+					},
+					error: (err) => {
+						console.log(err);
+						$('#falseUp').modal('show');
+					}
+				})
+				return false;//禁止默认行为
+			})
+			
+			
+		</script>
+	
+
+	</body>
+</html>
